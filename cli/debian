@@ -1,0 +1,61 @@
+#!/bin/bash
+set -e
+if [[ "$1" == "--help" ]] ; then
+    echo "debian [options]"
+    echo "  --help         : Write this message"
+    echo "  -c             : Run command from subsystem"
+    echo "  --no-install   : Do not install if not installed."
+    echo "  --update       : Install update if exists."
+    echo "  --system       : Change target subsystem."
+    echo "  --hostctl      : Use hostctl daemon."
+    echo "  --fork         : Create fork process."
+    exit 0
+fi
+if [[ "$1" == "--fork" ]] ; then
+    use_fork="true"
+    shift
+fi
+if [[ "$1" == "--hostctl" ]] ; then
+    use_hostctl="true"
+    shift
+fi
+if [[ "$1" == "--system" ]] ; then
+    export SYSTEM="$2"
+    shift
+    shift
+fi
+source /usr/lib/sulin/dsl/variable.sh
+source /usr/lib/sulin/dsl/functions.sh
+if [[ "$1" == "--no-install" ]] ; then
+    if [[ ! -f "${DESTDIR}/etc/os-release" ]] ; then
+        exit 0
+    fi
+    shift
+fi
+
+if [[ -f "$1" ]] ; then
+    cat $1 | $(get_root) /usr/lib/sulin/dsl/dsl.sh
+elif [[ "$1" == "-c" ]] ; then
+    shift
+    if [[ "${use_hostctl}" == "true" ]] && ls ${DESTDIR}/run/hostctl &>/dev/null  ; then
+        echo 'echo "'$*'" | '$(get_root)' /usr/lib/sulin/dsl/dsl.sh' > ${DESTDIR}/run/hostctl
+    elif [[ "${use_fork}" == "true" ]] &>/dev/null  ; then
+        echo "$*" | $(get_root) /usr/lib/sulin/dsl/dsl.sh &
+    else
+        echo "$*" | exec $(get_root) /usr/lib/sulin/dsl/dsl.sh
+     fi
+elif [[ "$1" == "--update" ]] ; then
+    isroot
+    rm -f ${DESTDIR}/var/cache/app-ltime
+    msg "Info" "Check update"
+    check_update
+    msg "Info" "Unmount all"
+    umount_all
+    msg "Info" "Sync group id"
+    sync_gid
+    msg "Info" "Sync applications"
+    sync_desktop
+else
+    exec $(get_root) /usr/lib/sulin/dsl/dsl.sh
+fi
+

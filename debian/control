@@ -1,0 +1,22 @@
+Source: debian-subsystem
+Section: utils
+Priority: optional
+Maintainer: Ali Riza KESKIN <parduscix@yandex.ru>
+Build-Depends: make,
+               gcc,
+               valac,
+               gobject-introspection, 
+               libvte-2.91-dev
+Standards-Version: 4.3.0
+Homepage: https://gitlab.com/sulincix/debian-subsystem
+
+Package: debian-subsystem
+Architecture: all
+Depends: ${misc:Depends}, ${shlibs:Depends}, libc6,
+          xz-utils,
+          zstd,
+          libvte-2.91-0,
+          busybox-static,
+          wget
+Description: Debian subsystem for linux
+ Easy way use debian chroot on own distribution

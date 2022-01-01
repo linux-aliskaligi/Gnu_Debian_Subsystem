@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Debian
+GenericName=Debian GNU/Linux
+Comment=Debian subsystem
+Path=/usr/lib/sulin/dsl
+Exec=debian-terminal
+Icon=/usr/lib/sulin/dsl/debian.svg
+Terminal=false
+Categories=System;

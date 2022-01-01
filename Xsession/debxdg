@@ -1,0 +1,33 @@
+#!/bin/bash
+set -e
+help_msg(){
+echo "Usage: debxdg [--get/--set] (file path)"
+echo "  --get     :  get variable"
+echo "  --set     :  set variable"
+echo "  file path :  open file with selected program"
+exit $1
+}
+[[ -f ~/.config/debxdg.conf ]] || cp -pf /etc/debxdg.conf ~/.config/debxdg.conf
+get(){
+    iniparser ~/.config/debxdg.conf "Main" "$1"
+}
+if [[ "$1" == "--get" ]] ; then
+    [[ "$2" == "" ]] && help_msg 1
+    get "$2"
+elif [[ "$1" == "--set" ]] ; then
+    [[ "$3" == "" || "$2" == "" ]] &&  help_msg 1
+    sed -i "/^$2=.*/d" ~/.config/debxdg.conf
+    echo "$2=$3" >> ~/.config/debxdg.conf
+elif [[ -e "$1" ]] ; then
+    file="$1"
+    suffix=${file##*.}
+    app=$(get $suffix)
+    if [[ "$app" == "" ]] ; then
+        xdg-open "$file"
+    else
+        "$app" "$file"
+    fi
+else
+    help_msg
+fi
+
